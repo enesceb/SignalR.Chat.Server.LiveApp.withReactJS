@@ -1,12 +1,15 @@
 
 import { Box } from "@mui/material";
 import LoginForm from './components/LoginForm';
+import Chat from './components/Chat';
 import { useState } from "react";
 import {HubConnectionBuilder, LogLevel} from '@microsoft/signalr';
 
 
 function App() {
   const [connection, setConnection] = useState();
+  const [messages, setMessages] = useState([]);
+
   const joinRoom  = async (user, room) => { 
     try {
         const connection = new HubConnectionBuilder()
@@ -15,7 +18,7 @@ function App() {
         .build();
 
         connection.on("ReceiveMessage", (user, message) => {
-          console.log(message);
+         setMessages(messages => [...messages, {user, message}])
         })
 
         await connection.start();
@@ -27,6 +30,12 @@ function App() {
     }
   }
 
+  const sendMessage = async (message) => {
+    try {
+      await connection.invoke("SendMessage", message);
+    }
+    catch (e) { console.error(e); }
+  }
 
   return (
     <Box
@@ -36,7 +45,10 @@ function App() {
         minHeight: '90vh',
       }}
     >
-      <LoginForm  joinRoom={joinRoom} />
+      {!connection 
+      ?<LoginForm  joinRoom={joinRoom} />
+      :<Chat sendMessage={sendMessage} messages={messages}/>
+    }
     </Box>
   );
 }
