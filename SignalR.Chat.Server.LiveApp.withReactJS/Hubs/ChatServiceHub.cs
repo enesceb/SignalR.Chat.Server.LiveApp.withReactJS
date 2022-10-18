@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SignalR.Chat.Server.LiveApp.withReactJS.Hubs
@@ -19,7 +20,9 @@ namespace SignalR.Chat.Server.LiveApp.withReactJS.Hubs
                 Clients.Group(userConnection.Room).SendAsync("ReceiveMessage", _botUser, $"{userConnection.User} has left {userConnection.Room}");
             }
 
-            return base.OnDisconnectedAsync(exception); 
+            return base.OnDisconnectedAsync(exception);
+
+            SendConnectedUsers(userConnection.Room);
         }
 
         public ChatServiceHub(IDictionary<string, UserConnection> connections)
@@ -35,7 +38,9 @@ namespace SignalR.Chat.Server.LiveApp.withReactJS.Hubs
 
             _connections[Context.ConnectionId] = userConnection;
 
-            await Clients.Group(userConnection.Room).SendAsync("ReceiveMessage", _botUser, $"{userConnection.User} has joined {userConnection.Room}");    
+            await Clients.Group(userConnection.Room).SendAsync("ReceiveMessage", _botUser, $"{userConnection.User} has joined {userConnection.Room}");
+
+            await SendConnectedUsers(userConnection.Room);
         }
 
         public async Task SendMessage(string message)
@@ -46,7 +51,16 @@ namespace SignalR.Chat.Server.LiveApp.withReactJS.Hubs
             }
         }
 
-        
+        public Task SendConnectedUsers(string room)
+        {
+            var users = _connections.Values
+                .Where(c => c.Room == room)
+                .Select(c => c.User);
+
+            return Clients.Group(room).SendAsync("UsersInRoom", users);
+        }
+
+
 
     }
 }

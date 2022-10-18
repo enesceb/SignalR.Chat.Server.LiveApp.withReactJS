@@ -19,114 +19,121 @@ import { Button } from '@mui/material';
 import { useEffect, useRef } from 'react';
 
 const useStyles = makeStyles({
-  table: {
-    minWidth: 650,
-  },
-  chatSection: {
-    width: '100%',
-    height: '80vh'
-  },
-  headBG: {
-      backgroundColor: '#e0e0e0'
-  },
-  borderRight500: {
-      borderRight: '1px solid #e0e0e0'
-  },
-  messageArea: {
-    height: '70vh',
-    overflowY: 'auto'
-  }
+    table: {
+        minWidth: 650,
+    },
+    chatSection: {
+        width: '100%',
+        height: '80vh'
+    },
+    headBG: {
+        backgroundColor: '#e0e0e0'
+    },
+    borderRight500: {
+        borderRight: '1px solid #e0e0e0'
+    },
+    messageArea: {
+        height: '70vh',
+        overflowY: 'auto'
+    }
 });
 
 
 
-const Chat = ({messages , sendMessage, closeConnection}) => {
-  const classes = useStyles();
-  const [message, setMessage] = useState('');
+const Chat = ({ messages, sendMessage, closeConnection, users }) => {
+    const classes = useStyles();
+    const [message, setMessage] = useState('');
+    const [searchTerm, setSearchTerm] = useState('')
 
-  const messageRef = useRef();
+    const messageRef = useRef();
 
-  useEffect(() => {
-    if(messageRef && messageRef.current){
-      const {scrollHeight, clientHeight} = messageRef.current;
-      messageRef.current.scrollTo({
-          left:0, top: scrollHeight - clientHeight,
-          behavior: 'smooth'
-      });
+    const searchHandle = (e) => {
+        setSearchTerm(e.target.value);
+        
     }
-  }, [messages])
 
-  return (
-    <Container component="main" sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '80vh',
-        width: '85%',
-        mt: 5,
-        p:4,
-        backgroundColor: "lightgrey",
-      }}
-        maxWidth="lg">
-        <Grid container spacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-            <Grid item xs={8} >
-                <Typography  variant="h5" className="header-message">Chat</Typography>
-            </Grid>
-            <Grid item xs={4} align="right">
-            <Button  variant="contained" color="error" onClick={() => closeConnection()} >
-            <Typography  variant="body1" className="header-message">Leave Room</Typography>
-            </Button>
-            </Grid>
-        </Grid>
-     
-        <Grid container component={Paper} className={classes.chatSection}>
-            <Grid item xs={3} className={classes.borderRight500}>
-                <List>
-                    <ListItem button key="RemySharp">
-                        <ListItemText primary="John Wick"></ListItemText>
-                    </ListItem>
-                </List>
-                <Divider />
-                <Grid item xs={12} style={{padding: '10px'}}>
-                    <TextField id="outlined-basic-email" label="Search" variant="outlined" fullWidth />
+    useEffect(() => {
+        if (messageRef && messageRef.current) {
+            const { scrollHeight, clientHeight } = messageRef.current;
+            messageRef.current.scrollTo({
+                left: 0, top: scrollHeight - clientHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [messages])
+
+    return (
+        <Container component="main" sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '80vh',
+            width: '85%',
+            mt: 5,
+            p: 4,
+            backgroundColor: "lightgrey",
+        }}
+            maxWidth="lg">
+            <Grid container spacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+              
+                <Grid item xs={12} align="right" >
+                    <Button variant="contained" color="error" onClick={() => closeConnection()} >
+                        <Typography variant="body1" className="header-message">Leave Room</Typography>
+                    </Button>
                 </Grid>
-                <Divider />
-                <List>
-                    <ListItem button key="RemySharp">
-                        <ListItemText primary="Remy Sharp">Remy Sharp</ListItemText>
-                        <ListItemText secondary="online" align="right"></ListItemText>
-                    </ListItem>
-                </List>
             </Grid>
-            <Grid item xs={9} >
-                <List className={classes.messageArea} ref={messageRef} >
-                    {messages.map((m, index) => 
-                        <ListItem key={index}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <ListItemText align="right" primary={m.message}></ListItemText>
+
+            <Grid container component={Paper} className={classes.chatSection}>
+                <Grid item xs={3} className={classes.borderRight500}>
+                    <List>
+                        <ListItem button key="Chat">
+                            <ListItemText primary="Chat"></ListItemText>
+                        </ListItem>
+                    </List>
+                    <Divider />
+                    <Grid item xs={12} style={{ padding: '10px' }}>
+                        <TextField onChange={searchHandle} id="outlined-basic-email" label="Search" variant="outlined" fullWidth />
+                    </Grid>
+                    <Divider />
+                    <List>
+                        {users.map((user, index) =>
+                            <ListItem button key={index}>
+                                <ListItemText primary={`${user}`}>{user}</ListItemText>
+                                <ListItemText secondary="online" align="right"></ListItemText>
+                            </ListItem>
+                        )}
+
+                    </List>
+                </Grid>
+                <Grid item xs={9} >
+                    <List className={classes.messageArea} ref={messageRef} >
+                        {messages.map((m, index) =>
+                            <ListItem key={index}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <ListItemText align="right" primary={m.message}></ListItemText>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <ListItemText align="right" secondary={m.user}></ListItemText>
+                                    </Grid>
+                                </Grid>
+                            </ListItem>
+                        )}
+                    </List>
+                    <Divider />
+                    <form onSubmit={e => { e.preventDefault(); sendMessage(message); setMessage(''); }}>
+                        <Grid container style={{ padding: '20px' }}>
+                            <Grid item xs={11}>
+                                <TextField id="outlined-basic-email" label="Type Something" fullWidth onChange={e => setMessage(e.target.value)} value={message} />
                             </Grid>
-                            <Grid item xs={12}>
-                                <ListItemText align="right" secondary={m.user}></ListItemText>
+                            <Grid xs={1} align="right">
+                                <Button type="submit" color="primary" aria-label="add" disabled={!message} ><SendIcon /></Button>
                             </Grid>
                         </Grid>
-                    </ListItem>
-                    )}
-                </List>
-                <Divider />
-                <form onSubmit={e => {e.preventDefault(); sendMessage(message); setMessage(''); }}>
-                <Grid container style={{padding: '20px'}}>
-                    <Grid item xs={11}>
-                        <TextField id="outlined-basic-email" label="Type Something" fullWidth  onChange={e => setMessage(e.target.value)} value={message}/>
-                    </Grid>
-                    <Grid xs={1} align="right">
-                        <Button type="submit" color="primary" aria-label="add" disabled={!message} ><SendIcon /></Button>
-                    </Grid>
+                    </form>
                 </Grid>
-                </form>
             </Grid>
-        </Grid>
-      </Container>
-  );
+        </Container>
+    );
 }
 
 export default Chat;
