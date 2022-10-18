@@ -16,7 +16,7 @@ import SendIcon from '@mui/icons-material/Send';
 import Container from '@mui/material/Container';
 import { useState } from "react";
 import { Button } from '@mui/material';
-
+import { useEffect, useRef } from 'react';
 
 const useStyles = makeStyles({
   table: {
@@ -38,25 +38,46 @@ const useStyles = makeStyles({
   }
 });
 
-const Chat = ({messages , sendMessage}) => {
+
+
+const Chat = ({messages , sendMessage, closeConnection}) => {
   const classes = useStyles();
   const [message, setMessage] = useState('');
+
+  const messageRef = useRef();
+
+  useEffect(() => {
+    if(messageRef && messageRef.current){
+      const {scrollHeight, clientHeight} = messageRef.current;
+      messageRef.current.scrollTo({
+          left:0, top: scrollHeight - clientHeight,
+          behavior: 'smooth'
+      });
+    }
+  }, [messages])
 
   return (
     <Container component="main" sx={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: '80vh',
-        width: '75%',
-        mt: 10,
-        backgroundColor: "gray"
+        width: '85%',
+        mt: 5,
+        p:4,
+        backgroundColor: "lightgrey",
       }}
         maxWidth="lg">
-        <Grid container>
-            <Grid item xs={12} >
+        <Grid container spacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+            <Grid item xs={8} >
                 <Typography  variant="h5" className="header-message">Chat</Typography>
             </Grid>
+            <Grid item xs={4} align="right">
+            <Button  variant="contained" color="error" onClick={() => closeConnection()} >
+            <Typography  variant="body1" className="header-message">Leave Room</Typography>
+            </Button>
+            </Grid>
         </Grid>
+     
         <Grid container component={Paper} className={classes.chatSection}>
             <Grid item xs={3} className={classes.borderRight500}>
                 <List>
@@ -76,8 +97,8 @@ const Chat = ({messages , sendMessage}) => {
                     </ListItem>
                 </List>
             </Grid>
-            <Grid item xs={9}>
-                <List className={classes.messageArea}>
+            <Grid item xs={9} >
+                <List className={classes.messageArea} ref={messageRef} >
                     {messages.map((m, index) => 
                         <ListItem key={index}>
                         <Grid container>
@@ -85,7 +106,7 @@ const Chat = ({messages , sendMessage}) => {
                                 <ListItemText align="right" primary={m.message}></ListItemText>
                             </Grid>
                             <Grid item xs={12}>
-                                <ListItemText align="right" secondary="Chat Bot"></ListItemText>
+                                <ListItemText align="right" secondary={m.user}></ListItemText>
                             </Grid>
                         </Grid>
                     </ListItem>

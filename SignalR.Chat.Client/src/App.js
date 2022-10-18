@@ -9,6 +9,8 @@ import {HubConnectionBuilder, LogLevel} from '@microsoft/signalr';
 function App() {
   const [connection, setConnection] = useState();
   const [messages, setMessages] = useState([]);
+  const [users, setusers] = useState([]);
+
 
   const joinRoom  = async (user, room) => { 
     try {
@@ -17,8 +19,18 @@ function App() {
         .configureLogging(LogLevel.Information)
         .build();
 
+        connection.on("UsersInRoom",(users) => {
+            setusers(users);
+        })
+
         connection.on("ReceiveMessage", (user, message) => {
          setMessages(messages => [...messages, {user, message}])
+        });
+        connection.onclose(e => {
+          setConnection();
+          setMessages([]);
+          setusers([]);
+
         })
 
         await connection.start();
@@ -28,6 +40,13 @@ function App() {
     catch (e) {
       console.error(e);
     }
+  }
+
+  const closeConnection = async () => { 
+    try {
+      connection.stop();
+    } 
+    catch (e) {console.error(e);} 
   }
 
   const sendMessage = async (message) => {
@@ -47,7 +66,7 @@ function App() {
     >
       {!connection 
       ?<LoginForm  joinRoom={joinRoom} />
-      :<Chat sendMessage={sendMessage} messages={messages}/>
+      :<Chat sendMessage={sendMessage} messages={messages} closeConnection={closeConnection} users={users} />
     }
     </Box>
   );

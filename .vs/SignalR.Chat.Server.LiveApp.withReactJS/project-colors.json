@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "65c10663-fc44-4671-b150-e9025f450487": {
+      "ProjectGuid": "65c10663-fc44-4671-b150-e9025f450487",
+      "DisplayName": "SignalR.Chat.Server.LiveApp.withReactJS",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}

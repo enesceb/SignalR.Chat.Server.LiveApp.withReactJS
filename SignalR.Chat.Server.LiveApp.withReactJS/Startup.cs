@@ -30,6 +30,8 @@ namespace SignalR.Chat.Server.LiveApp.withReactJS
                  
                 });
              });
+
+            services.AddSingleton<IDictionary<string, UserConnection>>(opt => new Dictionary<string, UserConnection>());
            
         }
 
